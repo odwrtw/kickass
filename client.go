@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	defaultAddress      = "http://kat.cr"
+	defaultAddress      = "https://kat.cr"
 	xpathTorrentResults = xmlpath.MustCompile("//tr[contains(@id, 'torrent_')]")
 	xpathTorrentName    = xmlpath.MustCompile(".//a[@class=\"cellMainLink\"]")
 	xpathTorrentURL     = xmlpath.MustCompile(".//a[contains(@title,'Download torrent file')]/@href")
-	xpathMagnetURL      = xmlpath.MustCompile(".//a[contains(@class, 'imagnet')]/@href")
+	xpathMagnetURL      = xmlpath.MustCompile(".//a[contains(@title,'Torrent magnet link')]/@href")
 	xpathSeed           = xmlpath.MustCompile(".//td[5]")
 	xpathLeech          = xmlpath.MustCompile(".//td[6]")
 	xpathAge            = xmlpath.MustCompile(".//td[4]")
