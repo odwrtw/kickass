@@ -4,25 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
 
 	"gopkg.in/xmlpath.v2"
 )
 
+// Kickass endpoint
+const Endpoint = "https://kat.cr"
+
 var (
-	defaultAddress      = "https://kat.cr"
-	xpathTorrentResults = xmlpath.MustCompile("//tr[contains(@id, 'torrent_')]")
-	xpathTorrentName    = xmlpath.MustCompile(".//a[@class=\"cellMainLink\"]")
-	xpathTorrentURL     = xmlpath.MustCompile(".//a[contains(@title,'Download torrent file')]/@href")
-	xpathMagnetURL      = xmlpath.MustCompile(".//a[contains(@title,'Torrent magnet link')]/@href")
-	xpathSeed           = xmlpath.MustCompile(".//td[5]")
-	xpathLeech          = xmlpath.MustCompile(".//td[6]")
-	xpathAge            = xmlpath.MustCompile(".//td[4]")
-	xpathSize           = xmlpath.MustCompile(".//td[2]")
-	xpathFileCount      = xmlpath.MustCompile(".//td[3]")
-	xpathVerify         = xmlpath.MustCompile(".//a[contains(@class,'iverify')]")
-	xpathUser           = xmlpath.MustCompile(".//a[contains(@href, '/user/')]")
 	//ErrUnexpectedContent returned when addic7ed's website seem to have change
 	ErrUnexpectedContent = errors.New("Unexpected content")
 )
@@ -41,26 +30,27 @@ type Torrent struct {
 	User       string
 }
 
-// Client kickass client
+// Client represents the kickass client
 type Client struct {
-	Address    string
-	HTTPClient *http.Client
+	Endpoint string
 }
 
 // New create client
 func New() Client {
 	return Client{
-		Address:    defaultAddress,
-		HTTPClient: &http.Client{},
+		Endpoint: Endpoint,
 	}
 }
 
-// Search torrent
-func (c *Client) Search(query string) (*[]Torrent, error) {
-	query = url.QueryEscape(query)
-	URL := c.Address + "/usearch/" + query
+// Search searches from a query
+func (c *Client) Search(q *Query) ([]*Torrent, error) {
+	URL := fmt.Sprintf("%s/usearch/%s/%s", c.Endpoint, q.searchField(), q.urlParams())
+	return c.getPage(URL)
+}
 
-	resp, err := c.HTTPClient.Get(URL)
+// getPage downloads a page and parses its content
+func (c *Client) getPage(URL string) ([]*Torrent, error) {
+	resp, err := http.Get(URL)
 	if err != nil {
 		return nil, err
 	}
@@ -73,88 +63,8 @@ func (c *Client) Search(query string) (*[]Torrent, error) {
 	return parseResult(root)
 }
 
-// SearchByUser search torrent by user
-func (c *Client) SearchByUser(query, user string) (*[]Torrent, error) {
-	q := fmt.Sprintf("%s user:%s", query, user)
-	return c.Search(q)
-}
-
-func parseResult(root *xmlpath.Node) (*[]Torrent, error) {
-	torrents := []Torrent{}
-	iter := xpathTorrentResults.Iter(root)
-	for iter.Next() {
-		name, ok := xpathTorrentName.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		torrentURL, ok := xpathTorrentURL.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		magnet, ok := xpathMagnetURL.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		verify := xpathVerify.Exists(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-
-		seedStr, ok := xpathSeed.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		seed, err := strconv.Atoi(seedStr)
-		if err != nil {
-			return nil, err
-		}
-
-		leechStr, ok := xpathLeech.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		leech, err := strconv.Atoi(leechStr)
-		if err != nil {
-			return nil, err
-		}
-
-		age, ok := xpathAge.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		fileCountStr, ok := xpathFileCount.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		fileCount, err := strconv.Atoi(fileCountStr)
-		if err != nil {
-			return nil, err
-		}
-
-		size, ok := xpathSize.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-		user, ok := xpathUser.String(iter.Node())
-		if !ok {
-			return nil, ErrUnexpectedContent
-		}
-
-		t := Torrent{
-			Name:       name,
-			TorrentURL: torrentURL,
-			MagnetURL:  magnet,
-			Seed:       seed,
-			Leech:      leech,
-			Age:        age,
-			FileCount:  fileCount,
-			Size:       size,
-			Verified:   verify,
-			User:       user,
-		}
-
-		torrents = append(torrents, t)
-	}
-
-	return &torrents, nil
+// ListByUser returns the torrents for a specific user
+func (c *Client) ListByUser(q *Query) ([]*Torrent, error) {
+	URL := fmt.Sprintf("%s/user/%s/uploads/%s", c.Endpoint, q.User, q.urlParams())
+	return c.getPage(URL)
 }
