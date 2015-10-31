@@ -11,6 +11,9 @@ import (
 // Kickass endpoint
 const Endpoint = "https://kat.cr"
 
+// MaxElementsPerPage represents the max number of elements per page
+const MaxElementsPerPage = 25
+
 var (
 	//ErrUnexpectedContent returned when addic7ed's website seem to have change
 	ErrUnexpectedContent = errors.New("Unexpected content")
@@ -71,6 +74,12 @@ func (c *Client) getPages(q *Query, baseURL string) ([]*Torrent, error) {
 		}
 
 		torrents = append(torrents, t...)
+
+		// If the number of results is lower than the max number of elements
+		// per page that means there is no need to continue
+		if len(t) < MaxElementsPerPage {
+			break
+		}
 	}
 
 	return torrents, nil
