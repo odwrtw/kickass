@@ -8,8 +8,8 @@ import (
 	"gopkg.in/xmlpath.v2"
 )
 
-// Kickass endpoint
-const Endpoint = "https://kat.cr"
+// Kickass default endpoint
+const DefaultEndpoint = "https://kat.cr"
 
 // MaxElementsPerPage represents the max number of elements per page
 const MaxElementsPerPage = 25
@@ -35,13 +35,15 @@ type Torrent struct {
 
 // Client represents the kickass client
 type Client struct {
-	Endpoint string
+	Endpoint   string
+	HTTPClient *http.Client
 }
 
-// New create client
+// New creates a new client
 func New() Client {
 	return Client{
-		Endpoint: Endpoint,
+		Endpoint:   DefaultEndpoint,
+		HTTPClient: http.DefaultClient,
 	}
 }
 
@@ -87,7 +89,7 @@ func (c *Client) getPages(q *Query, baseURL string) ([]*Torrent, error) {
 
 // getPage downloads a page and parses its content
 func (c *Client) getPage(URL string) ([]*Torrent, error) {
-	resp, err := http.Get(URL)
+	resp, err := c.HTTPClient.Get(URL)
 	if err != nil {
 		return nil, err
 	}
