@@ -13,6 +13,7 @@ type Query struct {
 	Order    string
 	Category string
 	ImdbID   string
+	Pages    int
 }
 
 // urlParams extracts the relevant params and builds a query string
