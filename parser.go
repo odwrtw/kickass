@@ -21,6 +21,9 @@ var (
 	xpathUser           = xmlpath.MustCompile(".//a[contains(@href, '/user/')]")
 )
 
+// Default parse function, to be overwritten during the tests
+var parseFunc = parseResult
+
 func parseResult(root *xmlpath.Node) ([]*Torrent, error) {
 	torrents := []*Torrent{}
 	iter := xpathTorrentResults.Iter(root)

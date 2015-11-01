@@ -2,6 +2,8 @@ Kickass
 =======
 
 [![GoDoc](https://godoc.org/github.com/odwrtw/kickass?status.svg)](http://godoc.org/github.com/odwrtw/kickass)
+[![Build Status](https://travis-ci.org/odwrtw/kickass.svg?branch=master)](https://travis-ci.org/odwrtw/kickass)
+[![Go Report Card](http://goreportcard.com/badge/odwrtw/kickass)](http://goreportcard.com/report/odwrtw/kickass)
 
 Golang library to get torrents from kickass
 

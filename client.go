@@ -14,9 +14,11 @@ const DefaultEndpoint = "https://kat.cr"
 // MaxElementsPerPage represents the max number of elements per page
 const MaxElementsPerPage = 25
 
+// Custom errors
 var (
-	//ErrUnexpectedContent returned when addic7ed's website seem to have change
-	ErrUnexpectedContent = errors.New("Unexpected content")
+	ErrUnexpectedContent  = errors.New("kickass: unexpected content")
+	ErrMissingUserParam   = errors.New("kickass: missing user param")
+	ErrMissingSearchParam = errors.New("kickass: missing search param")
 )
 
 // Torrent represents a torrent from kickass
@@ -47,16 +49,32 @@ func New() Client {
 	}
 }
 
+func (c *Client) searchBaseURL(q *Query) string {
+	return fmt.Sprintf("%s/usearch/%s", c.Endpoint, q.searchField())
+}
+
 // Search searches from a query
 func (c *Client) Search(q *Query) ([]*Torrent, error) {
-	baseURL := fmt.Sprintf("%s/usearch/%s", c.Endpoint, q.searchField())
-	return c.getPages(q, baseURL)
+	// The only required param is the search
+	if q.Search == "" {
+		return nil, ErrMissingSearchParam
+	}
+
+	return c.getPages(q, c.searchBaseURL(q))
+}
+
+func (c *Client) listByUserBaseURL(q *Query) string {
+	return fmt.Sprintf("%s/user/%s/uploads", c.Endpoint, q.User)
 }
 
 // ListByUser returns the torrents for a specific user
 func (c *Client) ListByUser(q *Query) ([]*Torrent, error) {
-	baseURL := fmt.Sprintf("%s/user/%s/uploads", c.Endpoint, q.User)
-	return c.getPages(q, baseURL)
+	// The only required param is the user
+	if q.User == "" {
+		return nil, ErrMissingUserParam
+	}
+
+	return c.getPages(q, c.listByUserBaseURL(q))
 }
 
 // getPages downloads each page and merges the results
@@ -99,5 +117,5 @@ func (c *Client) getPage(URL string) ([]*Torrent, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseResult(root)
+	return parseFunc(root)
 }

@@ -28,12 +28,8 @@ func (q *Query) urlParams() string {
 		urlValues.Add("sorder", q.Order)
 	}
 
-	str := urlValues.Encode()
-	if str != "" {
-		str = "?" + str
-	}
-
-	return str
+	u := url.URL{RawQuery: urlValues.Encode()}
+	return u.String()
 }
 
 // searchField return a string with the relevant query params
