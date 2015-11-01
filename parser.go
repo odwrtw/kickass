@@ -84,7 +84,7 @@ func parseResult(root *xmlpath.Node) ([]*Torrent, error) {
 		user, ok := xpathUser.String(iter.Node())
 		if !ok {
 			// The user name is not always present
-			user = "anonymous"
+			user = ""
 		}
 
 		t := &Torrent{
