@@ -63,7 +63,7 @@ func TestGetResults(t *testing.T) {
 			t.Fatalf("expected no error got %q", err)
 		}
 
-		url, err := url.Parse(fmt.Sprintf("%s/%d/%s", m.baseURLFunc(mockQuery), 1, mockQuery.urlParams()))
+		url, err := url.Parse(fmt.Sprintf("%s/%s", m.baseURLFunc(mockQuery), mockQuery.urlParams(1)))
 		if err != nil {
 			t.Fatalf("failed to parse URL: %q", err)
 		}

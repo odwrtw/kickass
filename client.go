@@ -87,7 +87,8 @@ func (c *Client) getPages(q *Query, baseURL string) ([]*Torrent, error) {
 	}
 
 	for i := 1; i <= q.Pages; i++ {
-		URL := fmt.Sprintf("%s/%d/%s", baseURL, i, q.urlParams())
+		URL := fmt.Sprintf("%s/%s", baseURL, q.urlParams(i))
+
 		t, err := c.getPage(URL)
 		if err != nil {
 			return nil, err

@@ -14,15 +14,15 @@ var mockQuery = &Query{
 
 func TestQueryURLParams(t *testing.T) {
 	// Test with mock query
-	expectedURLParams := "?field=seeders&sorder=desc"
-	if mockQuery.urlParams() != expectedURLParams {
-		t.Errorf("invalid URL params, expected %q, got %q", expectedURLParams, mockQuery.urlParams())
+	expectedURLParams := "?field=seeders&page=2&sorder=desc"
+	if mockQuery.urlParams(2) != expectedURLParams {
+		t.Errorf("invalid URL params, expected %q, got %q", expectedURLParams, mockQuery.urlParams(2))
 	}
 
 	// Test with empty query
 	q := &Query{}
-	if q.urlParams() != "" {
-		t.Errorf("invalid URL params, expected nothing, got %q", q.urlParams())
+	if q.urlParams(0) != "" {
+		t.Errorf("invalid URL params, expected nothing, got %q", q.urlParams(0))
 	}
 }
 
@@ -36,6 +36,6 @@ func TestQuerySearchField(t *testing.T) {
 	// Test with simple search
 	q := &Query{Search: mockQuery.Search}
 	if q.searchField() != q.Search {
-		t.Errorf("invalid search field, expected %q, got %q", mockQuery.Search, q.urlParams())
+		t.Errorf("invalid search field, expected %q, got %q", mockQuery.Search, q.searchField())
 	}
 }

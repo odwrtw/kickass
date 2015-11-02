@@ -2,6 +2,7 @@ package kickass
 
 import (
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -17,8 +18,12 @@ type Query struct {
 }
 
 // urlParams extracts the relevant params and builds a query string
-func (q *Query) urlParams() string {
+func (q *Query) urlParams(page int) string {
 	urlValues := &url.Values{}
+
+	if page != 0 {
+		urlValues.Add("page", strconv.Itoa(page))
+	}
 
 	if q.OrderBy != "" {
 		urlValues.Add("field", q.OrderBy)
