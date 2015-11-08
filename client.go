@@ -42,8 +42,8 @@ type Client struct {
 }
 
 // New creates a new client
-func New() Client {
-	return Client{
+func New() *Client {
+	return &Client{
 		Endpoint:   DefaultEndpoint,
 		HTTPClient: http.DefaultClient,
 	}
