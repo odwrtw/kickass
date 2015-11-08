@@ -8,6 +8,7 @@ import (
 
 // XPATH
 var (
+	xpathNoResult       = xmlpath.MustCompile("//text()[contains(.,'did not match any documents')]")
 	xpathTorrentResults = xmlpath.MustCompile("//tr[contains(@id, 'torrent_')]")
 	xpathTorrentName    = xmlpath.MustCompile(".//a[@class=\"cellMainLink\"]")
 	xpathTorrentURL     = xmlpath.MustCompile(".//a[contains(@title,'Download torrent file')]/@href")
@@ -26,6 +27,12 @@ var parseFunc = parseResult
 
 func parseResult(root *xmlpath.Node) ([]*Torrent, error) {
 	torrents := []*Torrent{}
+
+	// Don't go further if there is no results
+	if xpathNoResult.Exists(root) {
+		return torrents, nil
+	}
+
 	iter := xpathTorrentResults.Iter(root)
 	for iter.Next() {
 		name, ok := xpathTorrentName.String(iter.Node())
